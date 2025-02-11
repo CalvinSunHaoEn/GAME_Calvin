@@ -60,22 +60,63 @@ const player = {
 
 // Obstacles
 class Obstacle {
-    constructor(y, speed, direction) {
+    constructor(y, speed, direction, type = 'normal') {
         this.width = OBSTACLE_WIDTH;
         this.height = OBSTACLE_HEIGHT;
         this.y = y;
+        this.baseY = y;  // Store original Y position for oscillating
         this.speed = speed;
+        this.baseSpeed = speed;  // Store original speed for speed-changing
         this.direction = direction;
         this.x = direction > 0 ? -this.width : canvas.width;
+        this.type = type;
+        
+        // Properties for oscillating obstacles
+        this.verticalSpeed = 1;
+        this.verticalRange = 30;
+        
+        // Properties for speed-changing obstacles
+        this.speedChangeTimer = 0;
+        this.speedChangeInterval = 120;  // Frames between speed changes
+        this.speedMultiplier = 1;
     }
 
     draw() {
-        ctx.fillStyle = '#ff0000';
+        switch(this.type) {
+            case 'oscillating':
+                ctx.fillStyle = '#800080';  // Purple
+                break;
+            case 'speed-changing':
+                ctx.fillStyle = '#FFA500';  // Orange
+                break;
+            default:
+                ctx.fillStyle = '#ff0000';  // Red
+        }
         ctx.fillRect(this.x, this.y, this.width, this.height);
     }
 
     update() {
-        this.x += this.speed * this.direction;
+        // Type-specific updates
+        switch(this.type) {
+            case 'oscillating':
+                // Oscillate up and down
+                this.y = this.baseY + Math.sin(Date.now() / 200) * this.verticalRange;
+                break;
+            case 'speed-changing':
+                // Change speed periodically
+                this.speedChangeTimer++;
+                if (this.speedChangeTimer >= this.speedChangeInterval) {
+                    this.speedMultiplier = this.speedMultiplier === 1 ? 2 : 1;
+                    this.speedChangeTimer = 0;
+                }
+                break;
+        }
+
+        // Update horizontal position
+        const currentSpeed = this.baseSpeed * (this.type === 'speed-changing' ? this.speedMultiplier : 1);
+        this.x += currentSpeed * this.direction;
+
+        // Reset position when off screen
         if (this.direction > 0 && this.x > canvas.width) {
             this.x = -this.width;
         } else if (this.direction < 0 && this.x < -this.width) {
@@ -86,11 +127,11 @@ class Obstacle {
 
 // Create obstacles
 const obstacles = [
-    new Obstacle(GRID_SIZE * 2, 2, 1),
-    new Obstacle(GRID_SIZE * 3, 3, -1),
-    new Obstacle(GRID_SIZE * 4, 4, 1),
-    new Obstacle(GRID_SIZE * 5, 2, -1),
-    new Obstacle(GRID_SIZE * 6, 3, 1)
+    new Obstacle(GRID_SIZE * 2, 2, 1, 'normal'),
+    new Obstacle(GRID_SIZE * 3, 3, -1, 'oscillating'),
+    new Obstacle(GRID_SIZE * 4, 4, 1, 'speed-changing'),
+    new Obstacle(GRID_SIZE * 5, 2, -1, 'oscillating'),
+    new Obstacle(GRID_SIZE * 6, 3, 1, 'speed-changing')
 ];
 
 // Collision detection
