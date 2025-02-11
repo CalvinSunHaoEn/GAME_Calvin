@@ -3,17 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Frogger Game</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Simple Frogger</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #333;
+        }
+        canvas {
+            border: 2px solid white;
+        }
+        #gameContainer {
+            text-align: center;
+        }
+        #score {
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 24px;
+            margin: 10px 0;
+        }
+    </style>
 </head>
 <body>
-    <div class="game-container">
-        <div class="game-header">
-            <span class="score">Score: <span id="score">0</span></span>
-            <button id="startBtn">Start Game</button>
-        </div>
-        <canvas id="gameCanvas"></canvas>
-        <div id="gameMessage" class="game-message"></div>
+    <div id="gameContainer">
+        <div id="score">Lives: <span id="livesValue">3</span> | Score: <span id="scoreValue">0</span></div>
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
     </div>
     <script src="game.js"></script>
 </body>
