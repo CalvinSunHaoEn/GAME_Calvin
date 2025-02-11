@@ -32,16 +32,16 @@ const player = {
         
         switch(direction) {
             case 'up':
-                if (this.y > 0) this.y -= this.speed;
+                if (this.y - this.speed >= 0) this.y -= this.speed;
                 break;
             case 'down':
-                if (this.y < canvas.height - this.height) this.y += this.speed;
+                if (this.y + this.speed <= canvas.height - this.height) this.y += this.speed;
                 break;
             case 'left':
-                if (this.x > 0) this.x -= this.speed;
+                if (this.x - this.speed >= 0) this.x -= this.speed;
                 break;
             case 'right':
-                if (this.x < canvas.width - this.width) this.x += this.speed;
+                if (this.x + this.speed <= canvas.width - this.width) this.x += this.speed;
                 break;
         }
 
