@@ -11,7 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Get DOM elements
     const canvas = document.getElementById('gameCanvas');
+    console.log('Canvas element:', canvas);
     const ctx = canvas.getContext('2d');
+    console.log('Canvas context:', ctx);
     const scoreElement = document.getElementById('scoreValue');
     const livesElement = document.getElementById('livesValue');
     const nameModal = document.getElementById('nameModal');
@@ -86,8 +88,14 @@ document.addEventListener('DOMContentLoaded', () => {
         height: PLAYER_SIZE,
         speed: GRID_SIZE,
         draw() {
+            // Draw player fill
             ctx.fillStyle = isInvulnerable ? 'rgba(0, 255, 0, 0.5)' : '#00ff00';
             ctx.fillRect(this.x, this.y, this.width, this.height);
+            
+            // Draw player border
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(this.x, this.y, this.width, this.height);
         },
         move(direction) {
             if (gameOver) return;
@@ -141,6 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         draw() {
+            // Draw obstacle fill
             switch(this.type) {
                 case 'oscillating':
                     ctx.fillStyle = '#800080';
@@ -152,6 +161,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     ctx.fillStyle = '#ff0000';
             }
             ctx.fillRect(this.x, this.y, this.width, this.height);
+            
+            // Draw obstacle border
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(this.x, this.y, this.width, this.height);
         }
 
         update() {
@@ -190,28 +204,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Collision detection
     function checkCollision(rect1, rect2) {
-        const buffer = 100;
-        const movementBuffer = 50;
+        return rect1.x < (rect2.x + rect2.width) &&
+               (rect1.x + rect1.width) > rect2.x &&
+               rect1.y < (rect2.y + rect2.height) &&
+               (rect1.y + rect1.height) > rect2.y;
+    }
+
+    // Draw grid helper
+    function drawGrid() {
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.lineWidth = 1;
         
-        let extendedX = rect2.x;
-        let extendedWidth = rect2.width;
-        if (rect2.direction > 0) {
-            extendedWidth += movementBuffer;
-        } else {
-            extendedX -= movementBuffer;
-            extendedWidth += movementBuffer;
+        // Draw vertical lines
+        for (let x = 0; x <= canvas.width; x += GRID_SIZE) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, canvas.height);
+            ctx.stroke();
         }
         
-        return (rect1.x - buffer) < (extendedX + extendedWidth) &&
-               (rect1.x + rect1.width + buffer) > extendedX &&
-               (rect1.y - buffer) < (rect2.y + rect2.height) &&
-               (rect1.y + rect1.height + buffer) > rect2.y;
+        // Draw horizontal lines
+        for (let y = 0; y <= canvas.height; y += GRID_SIZE) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(canvas.width, y);
+            ctx.stroke();
+        }
     }
 
     // Game loop
     function gameLoop() {
+        console.log('Game loop running...');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+        // Draw grid first
+        drawGrid();
+        console.log('Grid drawn');
+
+        // Draw safe zones
         ctx.fillStyle = '#4CAF50';
         ctx.fillRect(0, 0, canvas.width, GRID_SIZE);
         ctx.fillRect(0, canvas.height - GRID_SIZE, canvas.width, GRID_SIZE);

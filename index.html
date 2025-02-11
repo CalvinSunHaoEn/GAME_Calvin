@@ -47,8 +47,6 @@
             display: flex;
             justify-content: center;
             margin-bottom: 10px;
-            position: relative;
-            z-index: 2;
         }
         #gameHeader {
             color: white;
@@ -61,7 +59,8 @@
             border: 2px solid rgba(255, 255, 255, 0.3);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
             min-width: 200px;
-            pointer-events: none;
+            position: relative;
+            z-index: 100;
         }
         #livesValue, #scoreValue {
             display: inline-block;
@@ -80,6 +79,7 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
             display: block;
             position: relative;
+            z-index: 1;
         }
         #nameModal {
             display: none;
@@ -144,6 +144,6 @@
             <button id="submitName">Submit</button>
         </div>
     </div>
-    <script src="game.js?v=12"></script>
+    <script src="game.js" onerror="console.error('Failed to load game.js')" defer></script>
 </body>
 </html>
