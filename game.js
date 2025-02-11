@@ -1,16 +1,20 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreElement = document.getElementById('scoreValue');
+const livesElement = document.getElementById('livesValue');
 
 // Game constants
 const GRID_SIZE = 40;
 const PLAYER_SIZE = 30;
 const OBSTACLE_HEIGHT = 30;
 const OBSTACLE_WIDTH = 60;
+const INVULNERABILITY_DURATION = 1500; // 1.5 seconds of invulnerability after hit
 
 // Game state
 let score = 0;
+let lives = 3;
 let gameOver = false;
+let isInvulnerable = false;
 
 // Player
 const player = {
@@ -20,7 +24,7 @@ const player = {
     height: PLAYER_SIZE,
     speed: GRID_SIZE,
     draw() {
-        ctx.fillStyle = '#00ff00';
+        ctx.fillStyle = isInvulnerable ? 'rgba(0, 255, 0, 0.5)' : '#00ff00';
         ctx.fillRect(this.x, this.y, this.width, this.height);
     },
     move(direction) {
@@ -43,7 +47,7 @@ const player = {
 
         // Check if player reached the top
         if (this.y === 0) {
-            score += 100;
+            score += 1;
             scoreElement.textContent = score;
             this.reset();
         }
@@ -113,8 +117,19 @@ function gameLoop() {
         obstacle.draw();
         
         // Check collision with player
-        if (checkCollision(player, obstacle)) {
-            gameOver = true;
+        if (checkCollision(player, obstacle) && !isInvulnerable) {
+            lives--;
+            livesElement.textContent = lives;
+            
+            if (lives <= 0) {
+                gameOver = true;
+            } else {
+                isInvulnerable = true;
+                player.reset();
+                setTimeout(() => {
+                    isInvulnerable = false;
+                }, INVULNERABILITY_DURATION);
+            }
         }
     });
 
@@ -157,11 +172,48 @@ document.addEventListener('keydown', (e) => {
             if (gameOver) {
                 gameOver = false;
                 score = 0;
+                lives = 3;
                 scoreElement.textContent = score;
+                livesElement.textContent = lives;
+                isInvulnerable = false;
                 player.reset();
                 gameLoop();
             }
             break;
+    }
+});
+
+// Click/touch controls
+canvas.addEventListener('click', (e) => {
+    if (gameOver) {
+        // Handle restart click
+        gameOver = false;
+        score = 0;
+        lives = 3;
+        scoreElement.textContent = score;
+        livesElement.textContent = lives;
+        isInvulnerable = false;
+        player.reset();
+        gameLoop();
+        return;
+    }
+
+    const rect = canvas.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const clickY = e.clientY - rect.top;
+    
+    // Determine movement based on click position relative to player
+    const playerCenterX = player.x + player.width / 2;
+    const playerCenterY = player.y + player.height / 2;
+    
+    const xDiff = clickX - playerCenterX;
+    const yDiff = clickY - playerCenterY;
+    
+    // Move in the direction of the largest difference
+    if (Math.abs(xDiff) > Math.abs(yDiff)) {
+        player.move(xDiff > 0 ? 'right' : 'left');
+    } else {
+        player.move(yDiff > 0 ? 'down' : 'up');
     }
 });
 
